@@ -1,43 +1,6 @@
 import pandas as pd
-from sqlalchemy import create_engine
 import os
-
-
-def connect_db(url):
-    return create_engine(url).connect()
-
-
-def exec(conn, query):
-    conn.exec_driver_sql(query)
-    conn.commit()
-
-
-def create_db(db_name, url):
-    try:
-        conn = connect_db(url)
-        create_query = f"CREATE DATABASE IF NOT EXISTS {db_name}"
-        exec(conn, create_query)
-        conn.close()
-        return "create db success!"
-    except Exception as e:
-        return f"Error \n{e}"
-
-
-def migration_csv_to_db(db_name, url, tbl_name, df_file, is_init: bool = False):
-    try:
-        conn = connect_db(url + db_name)
-        df_file.to_sql(tbl_name, con=conn, if_exists="append", index=False)
-        pd.read_sql_query
-        if is_init:
-            query_add_id = (
-                f"ALTER TABLE {tbl_name} ADD COLUMN id INT AUTO_INCREMENT PRIMARY KEY;"
-            )
-            exec(conn=conn, query=query_add_id)
-        conn.close()
-        return f"{tbl_name} migration success!"
-    except Exception as e:
-        return f"Error \n{e}"
-
+from controllers.controller import *
 
 mysql_url = os.getenv("MYSQL_DB_URL")
 db_name = "first_project"
