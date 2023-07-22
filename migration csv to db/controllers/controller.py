@@ -3,8 +3,13 @@ import pandas as pd
 
 
 def connect_db(url):
-    """
-    just connecting DB URL to sqlalchemy
+    """Connecting database using sqlalchemy
+
+    Args:
+        url (str): DB Url
+
+    Returns:
+        engine: connection db transactions
     """
     return create_engine(url).connect()
 
@@ -20,7 +25,7 @@ def exec(conn, query):
     conn.commit()
 
 
-def create_db(db_name, url):
+def create_db(db_name, url, db_select: str = "mysql"):
     """create database session
 
     Args:
@@ -30,18 +35,22 @@ def create_db(db_name, url):
     Returns:
         _type_: _description_
     """
-    try:
-        conn = connect_db(url)
-        create_query = f"CREATE DATABASE IF NOT EXISTS {db_name}"
+    conn = connect_db(url)
+    db = ""
+    if "mysql" in db_select.lower():
+        db = "IF NOT EXISTS"
+        create_query = f"CREATE DATABASE {db} {db_name};"
         exec(conn, create_query)
         conn.close()
         return "create db success!"
-    except Exception as e:
-        return f"Error \n{e}"
+    else:
+        pass
 
 
-def migration_csv_to_db(db_name, url, tbl_name, df_file, is_init: bool = False):
-    """_summary_
+def migration_csv_to_db(
+    db_name, url, tbl_name, df_file, db_select: str = "mysql", is_init: bool = False
+):
+    """Migration csv file to database
 
     Args:
         db_name (str): name of database
@@ -51,18 +60,18 @@ def migration_csv_to_db(db_name, url, tbl_name, df_file, is_init: bool = False):
         is_init (bool, optional): if initialize create table select True. Defaults to False.
 
     Returns:
-        _type_: _description_
+        str: status migration
     """
-    try:
+    pd.read_sql_query
+    if db_select.lower() == "mysql":
         conn = connect_db(url + db_name)
-        df_file.to_sql(tbl_name, con=conn, if_exists="append", index=False)
-        pd.read_sql_query
-        if is_init:
-            query_add_id = (
-                f"ALTER TABLE {tbl_name} ADD COLUMN id INT AUTO_INCREMENT PRIMARY KEY;"
-            )
-            exec(conn=conn, query=query_add_id)
-        conn.close()
-        return f"{tbl_name} migration success!"
-    except Exception as e:
-        return f"Error \n{e}"
+        type_sql = f"INT AUTO_INCREMENT "
+    elif db_select.lower() == "postgres":
+        conn = connect_db(url)
+        type_sql = f"Serial"
+    df_file.to_sql(tbl_name, con=conn, if_exists="append", index=False)
+    query_add_id = f"ALTER TABLE {tbl_name} ADD COLUMN id {type_sql} PRIMARY KEY;"
+    if is_init:
+        exec(conn=conn, query=query_add_id)
+    conn.close()
+    return f"{tbl_name} migration success!"
