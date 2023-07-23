@@ -41,10 +41,8 @@ def create_db(db_name, url, db_select: str = "mysql"):
         db = "IF NOT EXISTS"
         create_query = f"CREATE DATABASE {db} {db_name};"
         exec(conn, create_query)
-        conn.close()
         return "create db success!"
-    else:
-        pass
+    conn.close()
 
 
 def migration_csv_to_db(
